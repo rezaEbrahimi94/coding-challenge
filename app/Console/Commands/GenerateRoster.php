@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Interfaces\RosterBuilderInterface;
 use App\Interfaces\RosterFormatterInterface;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -51,7 +52,7 @@ class GenerateRoster extends Command
 
         $nurses = $this->rosterBuilder->loadNursesFromFile($filename);
 
-        $rosters = $this->rosterBuilder->buildRoster($nurses, $startDate, $endDate);
+        $rosters = $this->rosterBuilder->buildRoster($nurses, Carbon::parse($startDate), Carbon::parse($endDate));
 
         $this->info(
             $this->rosterFormatter->formatRoster(
