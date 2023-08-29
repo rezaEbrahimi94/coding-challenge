@@ -2,11 +2,20 @@
 
 namespace App\Console\Commands;
 
+use App\Interfaces\RosterBuilderInterface;
+use App\Interfaces\RosterFormatterInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class GenerateRoster extends Command
 {
+    public function __construct(
+        private RosterBuilderInterface $rosterBuilder,
+        private RosterFormatterInterface $rosterFormatter
+    ) {
+        parent::__construct();
+    }
     /**
      * The name and signature of the console command.
      *
@@ -39,6 +48,16 @@ class GenerateRoster extends Command
         }
 
         $this->info("Generating roster for {$this->argument('filename')} from {$startDate} to {$endDate}");
+
+        $nurses = $this->rosterBuilder->loadNursesFromFile($filename);
+
+        $rosters = $this->rosterBuilder->buildRoster($nurses, $startDate, $endDate);
+
+        $this->info(
+            $this->rosterFormatter->formatRoster(
+                $rosters
+            )->join("\n")
+        );
     }
 
     public function validateArguments(string $filename, string $startDate, string $endDate): bool
