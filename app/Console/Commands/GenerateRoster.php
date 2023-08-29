@@ -30,7 +30,7 @@ class GenerateRoster extends Command
      */
     public function handle()
     {
-        $filename = storage_path($this->argument('filename'));
+        $filename = $this->argument('filename');
         $startDate = $this->argument('start-date');
         $endDate = $this->argument('end-date');
 
@@ -53,12 +53,6 @@ class GenerateRoster extends Command
             'end-date' => 'required|date_format:Y-m-d|after_or_equal:start-date',
         ]);
 
-        // Check if file exists
-        if (!file_exists($filename)) {
-            $this->error("File {$filename} does not exist");
-            return false;
-        }
-
         if ($validator->fails()) {
             $this->info('Cannot start command, see errors below:');
         
@@ -67,6 +61,15 @@ class GenerateRoster extends Command
             }
             return false;
         }
+
+        // Check if file exists
+        if (!Storage::exists($filename)) {
+            $this->info('Cannot start command:');
+
+            $this->error("File {$filename} does not exist");
+            return false;
+        }
+
         return true;
     }
 }
