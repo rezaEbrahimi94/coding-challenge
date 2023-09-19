@@ -23,7 +23,7 @@ class GenerateRoster extends Command
      * @var string
      */
     protected $signature = 'app:generate-roster
-                            {filename : the first date of the period to roster, in YYYY-MM-DD format}
+                            {filename : filename of the nurses file to import, in JSON format}
                             {start-date : the first date of the period to roster, in YYYY-MM-DD format}
                             {end-date : a nurses file to import}
     ';
