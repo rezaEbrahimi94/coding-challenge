@@ -1,6 +1,6 @@
 Welcome to the coding challenge! This challenge serves as the foundation for a technical interview where we will review your code together. 
 
-Instructions for the task can be found in README.md inside the repository: (https://github.com/0plus1/GOYCodingChallengeBE)
+Instructions for the task can be found in README.md inside the repository.
 
 *The starter project code*:
 The starter project contains code to handle input from the command line, code to output the results, and some test setup. You’re free to change this code in any way you see fit, but the inputs it accepts and the format of the output it produces should remain the same.
@@ -26,9 +26,9 @@ Here are some thing we will be looking at and can give feedback on in the sessio
   * how you ensured the quality of your code (eg testing)
 
 *How to submit*
-  * Fork this repository
-  * In your new, forked repository create a new branch
-  * Open a Pull Request in your own repository only
-  * Let us know it's all done
+  * Unzip the challenge, it will already have a .git folder
+  * Create a new 
+  * Commit your work (bonus point for clear commits)
+  * Zip your folder and send it back to us
  
 I will keep an eye out for your submission and will come back to you with feedback and next steps after we review it with the team.
