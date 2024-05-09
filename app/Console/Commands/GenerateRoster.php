@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Interfaces\RosterBuilderInterface;
 use App\Interfaces\RosterFormatterInterface;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +34,7 @@ class GenerateRoster extends Command
      *
      * @var string
      */
-    protected $description = 'Build a nurses roster';
+    protected $description = 'Build a nurses roster and output it to a PDF file';
 
     /**
      * Execute the console command.
@@ -59,6 +60,30 @@ class GenerateRoster extends Command
                 $rosters
             )->join("\n")
         );
+
+        // Prepare data for PDF
+        $data = [
+            'rosters' => $rosters,
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ];
+
+        // Generate PDF
+        $pdf = PDF::loadView('roster_pdf', $data);
+        $outputPath = 'rosters/' . $startDate . '_to_' . $endDate . '.pdf';
+        Storage::put($outputPath, $pdf->output());
+        $fullPath = Storage::path($outputPath);
+        $this->info("PDF generated and saved to: $fullPath");
+
+        // Attempt to open the PDF automatically
+        if (PHP_OS_FAMILY === 'Darwin') {
+            exec("open '$fullPath'");
+        } elseif (PHP_OS_FAMILY === 'Windows') {
+            exec("start $fullPath");
+        } elseif (PHP_OS_FAMILY === 'Linux') {
+            exec("xdg-open '$fullPath'");
+        }
+
     }
 
     public function validateArguments(string $filename, string $startDate, string $endDate): bool
@@ -75,7 +100,7 @@ class GenerateRoster extends Command
 
         if ($validator->fails()) {
             $this->info('Cannot start command, see errors below:');
-        
+
             foreach ($validator->errors()->all() as $error) {
                 $this->error($error);
             }
