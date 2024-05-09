@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\RosterBuilderInterface;
 use App\Models\Nurse;
+use App\Models\Shift;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
@@ -32,8 +33,44 @@ class RosterBuilderRepository implements RosterBuilderInterface
         return $nurses;
     }
 
+    /**
+     * Generates a roster for a specified period.
+     *
+     * @param Collection $nurses Collection of nurses.
+     * @param Carbon $startDate Start date of the period.
+     * @param Carbon $endDate End date of the period.
+     * @return Collection Collection of Shift models.
+     */
     public static function buildRoster(Collection $nurses, Carbon $startDate, Carbon $endDate): Collection
     {
-        throw new Exception('Not implemented');
+        $allShifts = collect();
+        $shiftTypes = [Shift::SHIFT_TYPE_MORNING, Shift::SHIFT_TYPE_EVENING, Shift::SHIFT_TYPE_NIGHT];
+        $nurseCount = $nurses->count();
+
+        if ($nurseCount < 5) {
+            throw new Exception("Not enough nurses to fill one shift.");
+        }
+
+        // Prepare a rotating index to cycle through nurses
+        $index = 0;
+
+        for ($date = $startDate->copy(); $date->lessThanOrEqualTo($endDate); $date->addDay()) {
+            foreach ($shiftTypes as $shiftType) {
+                $shiftNurses = collect();
+                for ($i = 0; $i < 5; $i++) { // Always pick 5 nurses
+                    $shiftNurses->push($nurses[($index + $i) % $nurseCount]);
+                }
+                $index = ($index + 5) % $nurseCount; // Move index by 5 for the next shift
+
+                $shift = new Shift([
+                    'date' => $date->copy(),
+                    'type' => $shiftType,
+                    'nurses' => $shiftNurses
+                ]);
+                $allShifts->push($shift);
+            }
+        }
+
+        return $allShifts;
     }
 }
