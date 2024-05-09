@@ -47,28 +47,31 @@ class RosterBuilderRepository implements RosterBuilderInterface
         $shiftTypes = [Shift::SHIFT_TYPE_MORNING, Shift::SHIFT_TYPE_EVENING, Shift::SHIFT_TYPE_NIGHT];
         $nurseCount = $nurses->count();
 
-        if ($nurseCount < 5) {
-            throw new Exception("Not enough nurses to fill one shift.");
+        if ($nurseCount < 15) {
+            throw new Exception("Not enough nurses to fill one day.");
         }
 
         // Prepare a rotating index to cycle through nurses
         $index = 0;
 
         for ($date = $startDate->copy(); $date->lessThanOrEqualTo($endDate); $date->addDay()) {
+            // Shift the starting index each day to ensure different nurses are picked for each shift type
+            $dailyIndex = $index;
+
             foreach ($shiftTypes as $shiftType) {
                 $shiftNurses = collect();
                 for ($i = 0; $i < 5; $i++) { // Always pick 5 nurses
-                    $shiftNurses->push($nurses[($index + $i) % $nurseCount]);
+                    $shiftNurses->push($nurses[($dailyIndex + $i) % $nurseCount]);
                 }
-                $index = ($index + 5) % $nurseCount; // Move index by 5 for the next shift
-
-                $shift = new Shift([
+                $allShifts->push(new Shift([
                     'date' => $date->copy(),
                     'type' => $shiftType,
                     'nurses' => $shiftNurses
-                ]);
-                $allShifts->push($shift);
+                ]));
+                $dailyIndex = ($dailyIndex + 5) % $nurseCount; // Move index by 5 for the next shift
             }
+            // Increment the starting index each day to rotate the nurse pool
+            $index = ($index + 5) % $nurseCount;
         }
 
         return $allShifts;
